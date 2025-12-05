@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   dev-container:
@@ -7,29 +7,28 @@ services:
     stdin_open: true
     tty: true
     working_dir: /workspace
-    network_mode: 'host' # used by vscode remote port forwarding
+    network_mode: "host" # used by vscode remote port forwarding
     #ports:
-      # - "3010:3000"   # Common frontend dev server
-      # - "3011:3001"
-      # - "5510:5000"   # Common Flask/Python server (mapped to 5500 to avoid conflicts)
-      # - "5511:5001"
-      # - "8010:8000"   # Common backend server
-      # - "8011:8001"
-      # - "8081:8080"   # Alternative HTTP
-      # - "9010:9000"   # Additional services
-      # - "2212:2222"
-      #- ""
+    # - "3010:3000"   # Common frontend dev server
+    # - "3011:3001"
+    # - "5510:5000"   # Common Flask/Python server (mapped to 5500 to avoid conflicts)
+    # - "5511:5001"
+    # - "8010:8000"   # Common backend server
+    # - "8011:8001"
+    # - "8081:8080"   # Alternative HTTP
+    # - "9010:9000"   # Additional services
+    # - "2212:2222"
+    #- ""
     volumes:
       - workspace:/workspace
       - claude-npm-cache:/root/.npm
-      - 'home:/home'
+      - "home:/home"
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - USERNAME=${USERNAME:-developer}
       - USER_UID=${USER_UID:-1001}
       - USER_GID=${USER_GID:-1001}
       - SSH_PUBLIC_KEY=${SSH_PUBLIC_KEY}
-
     entrypoint: /bin/sh
     command:
       - -c
@@ -65,4 +64,3 @@ services:
         # Fix workspace ownership and switch to user
         chown -R $USERNAME:$USERNAME /workspace 2>/dev/null || true
         exec su - $USERNAME -c "cd /workspace && bash"
-
