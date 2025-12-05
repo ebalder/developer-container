@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  dev-container:
+    build: .
+    container_name: dev-container
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    network_mode: 'host' # used by vscode remote port forwarding
+    #ports:
+      # - "3010:3000"   # Common frontend dev server
+      # - "3011:3001"
+      # - "5510:5000"   # Common Flask/Python server (mapped to 5500 to avoid conflicts)
+      # - "5511:5001"
+      # - "8010:8000"   # Common backend server
+      # - "8011:8001"
+      # - "8081:8080"   # Alternative HTTP
+      # - "9010:9000"   # Additional services
+      # - "2212:2222"
+      #- ""
+    volumes:
+      - workspace:/workspace
+      - claude-npm-cache:/root/.npm
+      - 'home:/home'
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - USERNAME=${USERNAME:-developer}
+      - USER_UID=${USER_UID:-1001}
+      - USER_GID=${USER_GID:-1001}
+      - SSH_PUBLIC_KEY=${SSH_PUBLIC_KEY}
+
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        set -e
+
+        # Create non-root user with sudo access (ignore if exists)
+        groupadd -g $USER_GID $USERNAME || true
+        useradd -m -u $USER_UID -g $USERNAME -s /bin/bash $USERNAME || true
+        echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME
+        chmod 0440 /etc/sudoers.d/$USERNAME
+        # Unlock account for SSH key auth (no password set)
+        usermod -p '*' $USERNAME
+
+        # Create entrypoint logic for Claude config symlink
+        if [ -f "/home/$USERNAME/.claude/.claude-root.json" ] && [ ! -L "/home/$USERNAME/.claude.json" ]; then
+          rm -f /home/$USERNAME/.claude.json
+          ln -sf /home/$USERNAME/.claude/.claude-root.json /home/$USERNAME/.claude.json
+        fi
+
+        # Configure SSH server
+        ssh-keygen -A
+        echo "Port 2212" >> /etc/ssh/sshd_config
+        echo "PermitRootLogin no" >> /etc/ssh/sshd_config
+        echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+        echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config
+        echo "AllowTcpForwarding yes" >> /etc/ssh/sshd_config
+        echo "AllowStreamLocalForwarding yes" >> /etc/ssh/sshd_config
+        mkdir -p /home/$USERNAME/.ssh
+        chmod 700 /home/$USERNAME/.ssh
+        chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh
+
+        echo "$SSH_PUBLIC_KEY" > /home/$USERNAME/.ssh/authorized_keys
+        chmod 600 /home/$USERNAME/.ssh/authorized_keys
+        chown $USERNAME:$USERNAME /home/$USERNAME/.ssh/authorized_keys
+
+        # Start SSH server
+        /usr/sbin/sshd
+
+        # Fix workspace ownership and switch to user
+        chown -R $USERNAME:$USERNAME /workspace 2>/dev/null || true
+        exec su - $USERNAME -c "cd /workspace && bash"
+
