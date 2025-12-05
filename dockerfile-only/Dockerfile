@@ -37,4 +37,10 @@ RUN mkdir -p /run/sshd \
     && echo "AllowTcpForwarding yes" >> /etc/ssh/sshd_config \
     && echo "AllowStreamLocalForwarding yes" >> /etc/ssh/sshd_config
 
+# Copy and set entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 WORKDIR /workspace
+
+ENTRYPOINT ["/entrypoint.sh"]

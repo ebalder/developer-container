@@ -50,14 +50,7 @@ services:
           ln -sf /home/$USERNAME/.claude/.claude-root.json /home/$USERNAME/.claude.json
         fi
 
-        # Configure SSH server
-        ssh-keygen -A
-        echo "Port 2212" >> /etc/ssh/sshd_config
-        echo "PermitRootLogin no" >> /etc/ssh/sshd_config
-        echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
-        echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config
-        echo "AllowTcpForwarding yes" >> /etc/ssh/sshd_config
-        echo "AllowStreamLocalForwarding yes" >> /etc/ssh/sshd_config
+        # Setup SSH authorized keys
         mkdir -p /home/$USERNAME/.ssh
         chmod 700 /home/$USERNAME/.ssh
         chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh
