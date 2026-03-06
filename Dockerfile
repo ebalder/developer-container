@@ -18,11 +18,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js LTS
-RUN wget -qO- https://nodejs.org/dist/v24.14.0/node-v24.14.0-linux-x64.tar.xz | tar -xJ -C /usr/local --strip-components=1
-
-# Install CLI tools globally
-RUN npm install -g @anthropic-ai/claude-code @openai/codex @google/gemini-cli
+# Install nvm, Node.js (latest), npm, and pnpm
+ENV NVM_DIR=/usr/local/nvm
+RUN mkdir -p "$NVM_DIR" \
+    && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | NVM_DIR="$NVM_DIR" bash \
+    && . "$NVM_DIR/nvm.sh" \
+    && nvm install node \
+    && nvm alias default node \
+    && npm install -g pnpm @anthropic-ai/claude-code @openai/codex @google/gemini-cli \
+    && NODE_BIN=$(dirname "$(nvm which default)") \
+    && ln -sf "$NODE_BIN/node" /usr/local/bin/node \
+    && ln -sf "$NODE_BIN/npm" /usr/local/bin/npm \
+    && ln -sf "$NODE_BIN/npx" /usr/local/bin/npx \
+    && ln -sf "$NODE_BIN/pnpm" /usr/local/bin/pnpm \
+    && printf 'export NVM_DIR="/usr/local/nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"\n[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"\n' \
+       > /etc/profile.d/nvm.sh \
+    && chmod +x /etc/profile.d/nvm.sh
 
 # Security: Block git push capability (read-only git)
 RUN git config --system --add push.default nothing \
