@@ -1,8 +1,10 @@
-Containerized claude to let it roam freely
+Containerized claude to let it do its thing without approvals.
+
+Includes Node and Python environments
 
 compatible with VS Code SSH remotes
 
-1. set the public key in the build env vars
+1. set the SSH public key in the build env vars
 2. you can use same key to connect to remote session with vscode
 3. use gnuscreen to keep long running sessions
 

@@ -32,3 +32,7 @@ mkdir -p /run/sshd
 # Fix workspace ownership and switch to user
 chown -R ${USERNAME:-developer}:${USERNAME:-developer} /workspace 2>/dev/null || true
 exec su - ${USERNAME:-developer} -c "cd /workspace && bash"
+
+# Add python deps to path
+echo 'export PATH="$PATH:$HOME/.local/bin"' >> ~/.bashrc
+source ~/.bashrc

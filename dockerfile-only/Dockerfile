@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssh-server \
     screen \
     xz-utils \
+    python3 \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js LTS

@@ -64,3 +64,7 @@ services:
         # Fix workspace ownership and switch to user
         chown -R $USERNAME:$USERNAME /workspace 2>/dev/null || true
         exec su - $USERNAME -c "cd /workspace && bash"
+
+        # Add python packages to PATH
+        echo 'export PATH="$PATH:$HOME/.local/bin"' >> ~/.bashrc
+        source ~/.bashrc
