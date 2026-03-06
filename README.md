@@ -14,4 +14,20 @@ compatible with VS Code SSH remotes
 2. Detach: Ctrl + A, D
 3. Reattach: screen -r my_session
 
-Suggested name: dev
+## Persisting keys
+
+```
+    eval "$(ssh-agent -s)"
+```
+
+```
+   ssh-add ~/.ssh/{private key file}
+```
+
+then add to ~/.ssh/config
+
+```
+    Host github.com
+    AddKeysToAgent yes
+    IdentityFile ~/.ssh/{private key file}
+```
